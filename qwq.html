@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>表情包人格测试</title>
+    <style>
+        :root {
+            --primary: #FF9F1C;  /* 主色调 */
+            --secondary: #2EC4B6; /* 辅助色 */
+            --bg: #F8F9FA;       /* 背景色 */
+            --text: #212529;     /* 文字色 */
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: var(--bg);
+            font-family: 'Segoe UI', system-ui;
+            line-height: 1.6;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        /* 测试标题 */
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+        .header h1 {
+            color: var(--primary);
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        /* 题目卡片 */
+        .question-card {
+            background: white;
+            border-radius: 1.5rem;
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            opacity: 0;
+            transform: translateY(20px);
+            transition: 0.6s ease;
+        }
+        .question-card.active {
+            opacity: 1;
+            transform: none;
+        }
+
+        /* 选项按钮 */
+        .option-group {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+        .option-btn {
+            flex: 1;
+            padding: 1rem;
+            border: 2px solid #ddd;
+            border-radius: 1rem;
+            background: none;
+            cursor: pointer;
+            transition: 0.3s ease;
+        }
+        .option-btn:hover {
+            border-color: var(--primary);
+        }
+        .option-btn.selected {
+            border-color: var(--secondary);
+            background: rgba(46,196,182,0.1);
+        }
+
+        /* 提交按钮 */
+        .submit-btn {
+            display: block;
+            width: 200px;
+            margin: 3rem auto;
+            padding: 1rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 2rem;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: 0.3s ease;
+        }
+        .submit-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 16px rgba(255,159,28,0.3);
+        }
+
+        /* 结果页 */
+        .result-card {
+            background: white;
+            border-radius: 2rem;
+            padding: 3rem;
+            text-align: center;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+        }
+        .result-title {
+            color: var(--secondary);
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+        .result-desc {
+            color: var(--text);
+            margin: 2rem 0;
+        }
+        .result-image {
+            width: 200px;
+            height: 200px;
+            margin: 0 auto;
+            background: #eee;
+            border-radius: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 测试标题 -->
+        <div class="header">
+            <h1>🤔 你给人的感觉像哪种类型的表情包？</h1>
+            <p>下滑👇完成10道题发现你的网络人格</p >
+        </div>
+
+        <!-- 题目容器 -->
+        <div id="questions">
+            <!-- 题目将通过JS动态生成 -->
+        </div>
+
+        <!-- 提交按钮 -->
+        <button class="submit-btn" onclick="showResult()">查看结果</button>
+
+        <!-- 结果容器 -->
+        <div id="result" class="result-card" style="display: none;">
+            <h2 class="result-title" id="result-title"></h2>
+            <div class="result-image" id="result-image"></div>
+            <p class="result-desc" id="result-desc"></p >
+            <button class="submit-btn" onclick="location.reload()">重新测试</button>
+        </div>
+    </div>
+
+    <script>
+        // 测试题目数据
+        const questions = [
+            "你已经站在了互联网潮流之巅，不管什么梗你都已经了如指掌",
+            "你聊天时会刻意维持表情包使用频率",
+            "你看人下菜碟，对不同的对象精挑细选不同尺度的表情包",
+            "你会定期整理自己的表情包收藏，过时的表情不配呆在你的收藏里",
+            "你并不算是一个温良的网友，指对待什么人都很友善的那种",
+            "你对与不同表情包传达的不同的微妙情感有敏锐的洞察力",
+            "你很在意和人聊天时对方发的表情包风格，认为这一定程度上代表ta对你的态度",
+            "你是互联网皇帝，你喜欢大胆开麦，有人攻击你你会毫不犹豫地骂回去",
+            "上网冲浪看到喜欢的表情包，你会掘地三尺想方设法得到它",
+            "你的语言表达能力已经精简到可以只靠表情包来传达所有的心情"
+        ];
+
+        // 测试结果数据
+        const results = [
+            {
+                type: "你是：龙图 ",
+                desc: "你深不可测，刀口舔血，杀人如麻。你深邃漆黑的双眼凝视着屏幕对面的敌人，随时准备发起下一场猎马战争。",
+                style: "🐉"
+            },
+            {
+                type: "你是：Troll face ",
+                desc: "WOMP WOMP💀💀💀你的攻击性和黑色幽默开始有一点强大了，你在冒犯与玩笑的边界游走，看着乐子穿梭在每一缕电子硝烟之间。",
+                style: "😼"
+            },
+            {
+                type: "你是：低模meme ",
+                desc: "已经在数字海洋里慢慢沉淀包浆，一颗糊糊的小鼻噶，只占用屏幕的一个角落但粒粒分明的存在感。懂的人自然明白，你的萌点没法被任何人超越。",
+                style: "🐄"
+            },
+            {
+                type: "你是：猫meme ",
+                desc: "比卖萌更抽象，比熊猫头更礼貌，你站在表情包通用程度的珠穆朗玛峰顶。猫meme的传播像一场无尽的赛博大流感，每只被选中的猫咪都将在互联网永生。",
+                style: "😈"
+            },
+            {
+                type: "你是：颜文字 ",
+                desc: "温柔和善的清流，像素点架构的简约萌感之巅。当代互联网的戾气无法沾染到你，古早时期互联网最纯真美好的一面仍然保留在你身上（^-^)。",
+                style: ":3"
+            }
+        ];
+
+        // 初始化测试
+        function initTest() {
+            const container = document.getElementById("questions");
+            
+            questions.forEach((text, index) => {
+                const card = document.createElement("div");
+                card.className = `question-card ${index === 0 ? 'active' : ''}`;
+                card.innerHTML = `
+                    <h3>第${index + 1}题</h3>
+                    <p>${text}</p >
+                    <div class="option-group">
+                        <button class="option-btn" data-score="0">是</button>
+                        <button class="option-btn" data-score="1">不好说</button>
+                        <button class="option-btn" data-score="2">不是</button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+
+            // 添加选项点击事件
+            document.querySelectorAll('.option-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    // 清除同组已选状态
+                    this.parentNode.querySelectorAll('.option-btn').forEach(b => {
+                        b.classList.remove('selected');
+                    });
+                    this.classList.add('selected');
+                });
+            });
+        }
+
+        // 计算总分
+        function calculateScore() {
+            let total = 0;
+            document.querySelectorAll('.option-group').forEach(group => {
+                const selected = group.querySelector('.selected');
+                if (selected) total += parseInt(selected.dataset.score);
+            });
+            return total;
+        }
+
+        // 显示结果
+        function showResult() {
+            const score = calculateScore();
+            let resultIndex;
+
+            if (score <= 7) resultIndex = 0;
+            else if (score <= 12) resultIndex = 1;
+            else if (score <= 15) resultIndex = 2;
+            else if (score <= 18) resultIndex = 3;
+            else resultIndex = 4;
+
+            // 显示结果卡片
+            document.getElementById('questions').style.display = 'none';
+            document.querySelector('.submit-btn').style.display = 'none';
+            const result = document.getElementById('result');
+            result.style.display = 'block';
+
+            // 填充结果内容
+            document.getElementById('result-title').textContent = results[resultIndex].type;
+            document.getElementById('result-desc').textContent = results[resultIndex].desc;
+            document.getElementById('result-image').textContent = results[resultIndex].style;
+        }
+
+        // 初始化
+        initTest();
+
+        // 题目卡片动画
+        const cards = document.querySelectorAll('.question-card');
+        window.addEventListener('scroll', () => {
+            cards.forEach(card => {
+                const cardTop = card.getBoundingClientRect().top;
+                if (cardTop < window.innerHeight * 0.8) {
+                    card.classList.add('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
